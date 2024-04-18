@@ -122,7 +122,7 @@ jobs:
         shell: bash
         run: |
           cd ${RUNNER_WORKSPACE}/build-llvm
-          cmake $GITHUB_WORKSPACE \
+          cmake $GITHUB_WORKSPACE\llvm \
           -G "Ninja" \
           -DCMAKE_BUILD_TYPE=${{ matrix.platform.build_type }} \
           -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform.arch }} \
