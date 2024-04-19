@@ -136,8 +136,8 @@ jobs:
           cd ${RUNNER_WORKSPACE}/build-llvm
           cmake --build . --target install --config ${{ matrix.platform.build_type }}
 
-      -name: Upload LLVM artifacts
+      - name: Upload LLVM artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: llvm-artifacts
-          path: ${{ matrix.platform.os_type }}-latest-${{ matrix.platform.build_type }}-artifacts
+          name: llvm
+          path: ${{ matrix.platform.os_type }}-latest-${{ matrix.platform.build_type }}-llvm
