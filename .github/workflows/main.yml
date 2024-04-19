@@ -53,6 +53,9 @@ jobs:
       image: ${{ matrix.platform.container_image || '' }}
 
     steps:
+      - name: Free up some space
+        run: rm -rf /opt/hostedtoolcache
+
       - name: Checkout LLVM
         uses: actions/checkout@v3
 
