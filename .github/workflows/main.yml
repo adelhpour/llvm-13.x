@@ -43,11 +43,7 @@ jobs:
             os_name: ubuntu-latest
             container_image: quay.io/pypa/manylinux2014_x86_64
             build_type: Release
-          - name: manylinux2014-debug
-            os_type: manylinux
-            os_name: ubuntu-latest
-            container_image: quay.io/pypa/manylinux2014_x86_64
-            build_type: Debug
+          # We don't build on manylinux2014-debug platform because the machine runs out of space while building it
     runs-on: ${{ matrix.platform.os_name }}
     container:
       image: ${{ matrix.platform.container_image || '' }}
@@ -143,3 +139,17 @@ jobs:
         run: |
           cd ${RUNNER_WORKSPACE}/build-llvm
           cmake --build . --target install --config ${{ matrix.platform.build_type }}
+
+      - name: Set artifacts path and name
+        shell: bash
+        run: |
+          cd ${RUNNER_WORKSPACE}
+          echo "artifacts_name=llvml-${{ matrix.platform.name }}-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+          # we need to use relative path as actions/upload-artifact@v1 cannot find it on containerized runners
+          echo "artifacts_path=../install-llvm" >> "${GITHUB_ENV}"
+
+      - name: Upload llvm binaries
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{env.artifacts_name}}
+          path: ${{env.artifacts_path}}
