@@ -53,7 +53,9 @@ jobs:
       image: ${{ matrix.platform.container_image || '' }}
 
     steps:
-      - name: Free up some space
+      - name: Free up some space for Debug builds
+        if : matrix.platform.build_type == 'Debug'
+        shell: bash
         run: rm -rf /opt/hostedtoolcache
 
       - name: Checkout LLVM
