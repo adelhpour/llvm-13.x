@@ -140,6 +140,13 @@ jobs:
           cd ${RUNNER_WORKSPACE}/build-llvm
           cmake --build . --target install --config ${{ matrix.platform.build_type }}
 
+      - name: Give Execute permissions to the binaries
+        shell: bash
+        run: |
+          cd ${RUNNER_WORKSPACE}
+          cd install-llvm/bin
+          chmod +x llvm-config
+
       - name: Set artifacts path and name
         shell: bash
         run: |
