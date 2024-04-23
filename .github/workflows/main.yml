@@ -145,7 +145,7 @@ jobs:
         run: |
           cd ${RUNNER_WORKSPACE}
           cd install-llvm/bin
-          chmod +x llvm-config
+          chmod a+x llvm-config
 
       - name: Set artifacts path and name
         shell: bash
