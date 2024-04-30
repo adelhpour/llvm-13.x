@@ -2,7 +2,10 @@ name: BuildLLVM
 
 on:
   push:
-    branches-ignore:
+    branches:
+      - release/13.x
+  pull_request:
+    branches:
       - '*'
 
 jobs:
