@@ -85,9 +85,6 @@ jobs:
       - name: Set MSVC as the default compiler on Windows
         if: matrix.platform.os_type == 'windows'
         uses: ilammy/msvc-dev-cmd@v1.6.0
-        with:
-          arch: ${HOST_ARCHITECTURE}
-          vsversion: ${{ matrix.platform.vs_version }}
 
       - name: Get visual studio version
         if : matrix.platform.os_type == 'windows'
