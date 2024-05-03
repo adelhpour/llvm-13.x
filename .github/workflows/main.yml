@@ -43,12 +43,10 @@ jobs:
             os_type: windows
             os_name: windows-latest
             build_type: Release
-            vs_version: 2019
           - name: windows-latest-debug
             os_type: windows
             os_name: windows-latest
             build_type: Debug
-            vs_version: 2019
           - name: manylinux2014-release
             os_type: manylinux
             os_name: ubuntu-latest
@@ -79,8 +77,15 @@ jobs:
           if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
             compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
             artifacts_name="llvm-${{ matrix.platform.name }}-mvsc-$compiler_version-$host_architecture"
-          else
-            artifacts_name="llvm-${{ matrix.platform.name }}-$host_architecture"
+          elif [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
+            os_version=$(sw_vers -productVersion)
+            artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
+          elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
+            os_version=$(lsb_release -rs)
+            artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
+          elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
+          os_name_without_build_type="${${{ matrix.platform.os_name }}%%-*}"
+          artifacts_name="llvm-$os_name_without_build_type-$host_architecture-${{ matrix.platform.build_type }}"
           fi
           echo "artifacts_name=$artifacts_name"
           
