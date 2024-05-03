@@ -96,7 +96,7 @@ jobs:
         run: echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
 
       - name: check host architecture
-        run: echo ${host_architecture{
+        run: echo ${host_architecture}
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
