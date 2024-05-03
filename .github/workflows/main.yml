@@ -90,8 +90,7 @@ jobs:
         if : matrix.platform.os_type == 'windows'
         shell: bash
         run: |
-          $vsVersion = (Get-ChildItem "C:\Program Files (x86)\Microsoft Visual Studio\" -Directory | Where-Object { $_.Name -match "^\d{2}\.\d$" } | Select-Object -Last 1).Name
-          echo "visual studio version is $vsVersion"
+          ls "C:\Program Files (x86)\Microsoft Visual Studio"
 
       - name: Upgrade gcc on ManyLinux
         if: matrix.platform.os_type == 'manylinux'
