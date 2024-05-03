@@ -96,7 +96,7 @@ jobs:
         run: |
           echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
           if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
-            echo "OSX_ARCHITECTURES="${host_architecture}" >> "${GITHUB_ENV}"
+            echo "OSX_ARCHITECTURES=${host_architecture}" >> "${GITHUB_ENV}"
           fi
 
       - name: check OS version
