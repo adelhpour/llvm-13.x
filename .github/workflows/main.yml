@@ -84,7 +84,7 @@ jobs:
             os_version=$(lsb_release -rs | cut -d '.' -f 1)
             artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
           elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
-            os_name="${{ matrix.platform.os_name }}"
+            os_name="${{ matrix.platform.os_type }}"
             os_name_without_build_type="${os_name%%-*}"
             artifacts_name="llvm-$os_name_without_build_type-$host_architecture-${{ matrix.platform.build_type }}"
           fi
@@ -238,23 +238,26 @@ jobs:
             echo "Compiler version: $(cl --version)"
           fi
 
-      #- name: Get visual studio version
-      #  if : matrix.platform.os_type == 'windows'
-      #  shell: bash
-      #  run: |
-      #    ls "C:\Program Files\Microsoft Visual Studio"
-
       - name: Set artifacts path and name
         shell: bash
         run: |
           cd ${RUNNER_WORKSPACE}
+          artifacts_name=""
           host_architecture=$(uname -m)
           if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
             compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-            echo "artifacts_name=llvm-${{ matrix.platform.name }}-mvsc-$compiler_version-$host_architecture" >> "${GITHUB_ENV}"
-          else
-            echo "artifacts_name=llvm-${{ matrix.platform.name }}-$host_architecture" >> "${GITHUB_ENV}"
-          # we need to use relative path as actions/upload-artifact@v1 cannot find it on containerized runners
+            echo "artifacts_name=llvm-${{ matrix.platform.os_type }}-msvc$compiler_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+          elif [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
+            os_version=$(sw_vers -productVersion | cut -d '.' -f 1)
+            echo "artifacts_name=llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+          elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
+            os_version=$(lsb_release -rs | cut -d '.' -f 1)
+            echo "artifacts_name=llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+          elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
+            os_name="${{ matrix.platform.os_type }}"
+            os_name_without_build_type="${os_name%%-*}"
+            echo "artifacts_name=llvm-${os_name_without_build_type}-${host_architecture}-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+          fi
           echo "artifacts_path=../install-llvm" >> "${GITHUB_ENV}"
 
       - name: Upload llvm binaries
