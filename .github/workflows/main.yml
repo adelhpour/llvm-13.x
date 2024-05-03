@@ -89,8 +89,14 @@ jobs:
             yum install -y centos-release-scl
             yum install -y devtoolset-11
             scl enable devtoolset-11 bash
-            echo "/opt/rh/devtoolset-11/root/usr/bin" >> $GITHUB_PATH
+            echo "/opt/rh/devtoolset-11/root/usr/bin" >> "${GITHUB_PATH}"
           fi
+
+        - name: Get Host Architecture
+          run: echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
+
+        - name: check host architecture
+          run: echo ${host_architecture{
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -153,7 +159,6 @@ jobs:
       - name: Configure CMake for LLVM
         shell: bash
         run: |
-          host_architecture=$(uname -m)
           cd ${RUNNER_WORKSPACE}/build-llvm
           cmake $GITHUB_WORKSPACE/llvm \
           -G "Ninja" \
