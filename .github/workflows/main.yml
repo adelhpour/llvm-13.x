@@ -86,20 +86,46 @@ jobs:
         if: matrix.platform.os_type == 'windows'
         uses: ilammy/msvc-dev-cmd@v1.6.0
 
-      - name: Get visual studio version
-        if : matrix.platform.os_type == 'windows'
-        shell: bash
-        run: |
-          ls -a "C:\Program Files\Microsoft Visual Studio"
-
-      - name: Upgrade gcc on ManyLinux
+      - name: Upgrade gcc on Linux
         if: matrix.platform.os_type == 'manylinux'
         shell: bash
         run: |
-          yum install -y centos-release-scl
-          yum install -y devtoolset-11
-          scl enable devtoolset-11 bash
-          echo "/opt/rh/devtoolset-11/root/usr/bin" >> $GITHUB_PATH
+          if [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
+            apt-get update
+            apt-get install -y software-properties-common
+            add-apt-repository -y ppa:ubuntu-toolchain-r/test
+            apt-get update
+            apt-get install -y gcc-11 g++-11
+            update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 90
+            update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 90
+          elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
+            yum install -y centos-release-scl
+            yum install -y devtoolset-11
+            scl enable devtoolset-11 bash
+            echo "/opt/rh/devtoolset-11/root/usr/bin" >> $GITHUB_PATH
+          fi
+
+      - name: Get compiler name
+        shell: bash
+        run: |
+          cd ${RUNNER_WORKSPACE}
+          compiler_name=""
+            if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
+                compiler=$(cc -v 2>&1 | grep "Apple clang" && echo "clang" || echo "gcc")
+                if [ "$compiler" == "clang" ]; then
+                  compiler_version=$(cc --version | head -n 1 | awk '{print $4}')
+                else
+                  compiler_version=$(cc --version | head -n 1 | awk '{print $3}')
+                fi
+                compiler_name=${compiler}-${compiler_version}
+            elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' || "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
+                compiler_version=$(gcc --version | head -n 1 | awk '{print $3}')
+                compiler_name=gcc-${compiler_version}
+            elif [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
+                compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
+                compiler_name=msvc-${compiler_version}
+            fi
+          echo "Compiler version: $compiler_name"
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -184,10 +210,46 @@ jobs:
           cd install-llvm/bin
           chmod a+x llvm-config
 
+      - name: Get Compiler Version
+        shell: bash
+        run: |
+          cd ${RUNNER_WORKSPACE}
+          if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
+            echo "Compiler version: $(clang --version)"
+          elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
+            echo "Compiler version: $(gcc --version)"
+          elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
+            echo "Compiler version: $(gcc --version)"
+          elif [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
+            echo "Compiler version: $(cl --version)"
+          fi
+
+      #- name: Get visual studio version
+      #  if : matrix.platform.os_type == 'windows'
+      #  shell: bash
+      #  run: |
+      #    ls "C:\Program Files\Microsoft Visual Studio"
+
       - name: Set artifacts path and name
         shell: bash
         run: |
           cd ${RUNNER_WORKSPACE}
+          compiler_name=""
+            if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
+                compiler=$(cc -v 2>&1 | grep "Apple clang" && echo "clang" || echo "gcc")
+                if [ "$compiler" == "clang" ]; then
+                  compiler_version=$(cc --version | head -n 1 | awk '{print $4}')
+                else
+                  compiler_version=$(cc --version | head -n 1 | awk '{print $3}')
+                fi
+                compiler_name=${compiler}-${compiler_version}
+            elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' || "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
+                compiler_version=$(gcc --version | head -n 1 | awk '{print $3}')
+                compiler_name=gcc-${compiler_version}
+            elif [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
+                compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
+                compiler_name=msvc-${compiler_version}
+            fi
           echo "artifacts_name=llvm-${{ matrix.platform.name }}" >> "${GITHUB_ENV}"
           # we need to use relative path as actions/upload-artifact@v1 cannot find it on containerized runners
           echo "artifacts_path=../install-llvm" >> "${GITHUB_ENV}"
