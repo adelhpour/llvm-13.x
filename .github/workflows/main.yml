@@ -93,10 +93,17 @@ jobs:
           fi
 
       - name: Get Host Architecture
-        run: echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
+        run: |
+          echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
+          if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
+            echo CMAKE_OSX_ARCHITECTURES="${host_architecture}" >> "${GITHUB_ENV}"
+          fi
 
-      - name: check host architecture
-        run: echo ${host_architecture}
+      - name: check OS version
+        if: matrix.platform.os_type == 'macos'
+        run: |
+          echo "OS version: ${CMAKE_OSX_ARCHITECTURES}"
+            
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -163,7 +170,7 @@ jobs:
           cmake $GITHUB_WORKSPACE/llvm \
           -G "Ninja" \
           -DCMAKE_BUILD_TYPE=${{ matrix.platform.build_type }} \
-          -DCMAKE_OSX_ARCHITECTURES=$host_architecture \
+          -DCMAKE_OSX_ARCHITECTURES=${host_architecture} \
           -DCMAKE_C_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_CXX_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_INSTALL_PREFIX="${RUNNER_WORKSPACE}/install-llvm"
@@ -186,16 +193,15 @@ jobs:
         run: |
           cd ${RUNNER_WORKSPACE}
           artifacts_name=""
-          host_architecture=$(uname -m)
           if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
             compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-msvc$compiler_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-msvc$compiler_version-${host_architecture}-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
           elif [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
             os_version=$(sw_vers -productVersion | cut -d '.' -f 1)
-            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-$os_version-${host_architecture}-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
           elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
             os_version=$(lsb_release -rs | cut -d '.' -f 1)
-            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-$os_version-${host_architecture}-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
           elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
             os_name="${{ matrix.platform.os_type }}"
             os_name_without_build_type="${os_name%%-*}"
