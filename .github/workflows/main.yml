@@ -118,7 +118,7 @@ jobs:
                   compiler_version=$(cc --version | head -n 1 | awk '{print $3}')
                 fi
                 compiler_name=${compiler}-${compiler_version}
-            elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' || "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
+            elif [[ "${{ matrix.platform.os_type }}" == 'ubuntu' || "${{ matrix.platform.os_type }}" == 'manylinux' ]]; then
                 compiler_version=$(gcc --version | head -n 1 | awk '{print $3}')
                 compiler_name=gcc-${compiler_version}
             elif [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
