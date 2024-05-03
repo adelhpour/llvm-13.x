@@ -76,7 +76,7 @@ jobs:
           host_architecture=$(uname -m)
           if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
             compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-            artifacts_name="llvm-${{ matrix.platform.os_type }}-mvsc-$compiler_version-$host_architecture-${{ matrix.platform.build_type }}"
+            artifacts_name="llvm-${{ matrix.platform.os_type }}-msvc$compiler_version-$host_architecture-${{ matrix.platform.build_type }}"
           elif [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
             os_version=$(sw_vers -productVersion | cut -d '.' -f 1)
             artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
@@ -84,7 +84,8 @@ jobs:
             os_version=$(lsb_release -rs | cut -d '.' -f 1)
             artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
           elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
-            os_name_without_build_type="${${{ matrix.platform.os_name }}%%-*}"
+            os_name="${{ matrix.platform.os_name }}"
+            os_name_without_build_type="${os_name%%-*}"
             artifacts_name="llvm-$os_name_without_build_type-$host_architecture-${{ matrix.platform.build_type }}"
           fi
           echo "artifacts_name=$artifacts_name"
