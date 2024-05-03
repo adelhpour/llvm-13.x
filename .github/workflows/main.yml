@@ -153,11 +153,12 @@ jobs:
       - name: Configure CMake for LLVM
         shell: bash
         run: |
+          host_architecture=$(uname -m)
           cd ${RUNNER_WORKSPACE}/build-llvm
           cmake $GITHUB_WORKSPACE/llvm \
           -G "Ninja" \
           -DCMAKE_BUILD_TYPE=${{ matrix.platform.build_type }} \
-          -DCMAKE_OSX_ARCHITECTURES=${HOST_ARCHITECTURE} \
+          -DCMAKE_OSX_ARCHITECTURES=$host_architecture \
           -DCMAKE_C_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_CXX_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_INSTALL_PREFIX="${RUNNER_WORKSPACE}/install-llvm"
