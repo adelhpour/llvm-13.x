@@ -94,16 +94,11 @@ jobs:
 
       - name: Get Host Architecture
         run: |
-          echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
+          architecture=$(uname -m)
+          echo "host_architecture=$architecture" >> "${GITHUB_ENV}"
           if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
-            echo "OSX_ARCHITECTURES=${host_architecture}" >> "${GITHUB_ENV}"
+            echo "OSX_ARCHITECTURES=$architecture" >> "${GITHUB_ENV}"
           fi
-
-      - name: check OS version
-        if: matrix.platform.os_type == 'macos'
-        run: |
-          echo "OS version: ${OSX_ARCHITECTURES}"
-            
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -170,7 +165,7 @@ jobs:
           cmake $GITHUB_WORKSPACE/llvm \
           -G "Ninja" \
           -DCMAKE_BUILD_TYPE=${{ matrix.platform.build_type }} \
-          -DCMAKE_OSX_ARCHITECTURES=${host_architecture} \
+          -DCMAKE_OSX_ARCHITECTURES=${OSX_ARCHITECTURES} \
           -DCMAKE_C_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_CXX_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_INSTALL_PREFIX="${RUNNER_WORKSPACE}/install-llvm"
