@@ -76,7 +76,7 @@ jobs:
           host_architecture=$(uname -m)
           if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
             compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-            artifacts_name="llvm-${{ matrix.platform.name }}-mvsc-$compiler_version-$host_architecture"
+            artifacts_name="llvm-${{ matrix.platform.os_type }}-mvsc-$compiler_version-$host_architecture"
           elif [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
             os_version=$(sw_vers -productVersion)
             artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
