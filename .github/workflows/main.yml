@@ -69,33 +69,6 @@ jobs:
       - name: Checkout LLVM
         uses: actions/checkout@v3
 
-      - name: get host architecture
-        shell: bash
-        run: |
-          artifacts_name=""
-          host_architecture=$(uname -m)
-          if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
-            compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-            artifacts_name="llvm-${{ matrix.platform.os_type }}-msvc$compiler_version-$host_architecture-${{ matrix.platform.build_type }}"
-          elif [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
-            os_version=$(sw_vers -productVersion | cut -d '.' -f 1)
-            artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
-          elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
-            os_version=$(lsb_release -rs | cut -d '.' -f 1)
-            artifacts_name="llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}"
-          elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
-            os_name="${{ matrix.platform.os_type }}"
-            os_name_without_build_type="${os_name%%-*}"
-            artifacts_name="llvm-$os_name_without_build_type-$host_architecture-${{ matrix.platform.build_type }}"
-          fi
-          echo "artifacts_name=$artifacts_name"
-          
-
-      - name: check host architecture
-        shell: bash
-        run: |
-          echo "HOST_ARCHITECTURE is: $HOST_ARCHITECTURE"
-
       - name: Set MSVC as the default compiler on Windows
         if: matrix.platform.os_type == 'windows'
         uses: ilammy/msvc-dev-cmd@v1.6.0
@@ -118,28 +91,6 @@ jobs:
             scl enable devtoolset-11 bash
             echo "/opt/rh/devtoolset-11/root/usr/bin" >> $GITHUB_PATH
           fi
-
-      - name: Get compiler name
-        shell: bash
-        run: |
-          cd ${RUNNER_WORKSPACE}
-          compiler_name=""
-            if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
-                compiler=$(cc -v 2>&1 | grep "Apple clang" && echo "clang" || echo "gcc")
-                if [ "$compiler" == "clang" ]; then
-                  compiler_version=$(cc --version | head -n 1 | awk '{print $4}')
-                else
-                  compiler_version=$(cc --version | head -n 1 | awk '{print $3}')
-                fi
-                compiler_name=${compiler}-${compiler_version}
-            elif [[ "${{ matrix.platform.os_type }}" == 'ubuntu' || "${{ matrix.platform.os_type }}" == 'manylinux' ]]; then
-                compiler_version=$(gcc --version | head -n 1 | awk '{print $3}')
-                compiler_name=gcc-${compiler_version}
-            elif [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
-                compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-                compiler_name=msvc-${compiler_version}
-            fi
-          echo "Compiler version: $compiler_name"
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -224,20 +175,6 @@ jobs:
           cd install-llvm/bin
           chmod a+x llvm-config
 
-      - name: Get Compiler Version
-        shell: bash
-        run: |
-          cd ${RUNNER_WORKSPACE}
-          if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
-            echo "Compiler version: $(clang --version)"
-          elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
-            echo "Compiler version: $(gcc --version)"
-          elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
-            echo "Compiler version: $(gcc --version)"
-          elif [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
-            echo "Compiler version: $(cl --version)"
-          fi
-
       - name: Set artifacts path and name
         shell: bash
         run: |
@@ -246,17 +183,17 @@ jobs:
           host_architecture=$(uname -m)
           if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
             compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-            echo "artifacts_name=llvm-${{ matrix.platform.os_type }}-msvc$compiler_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-msvc$compiler_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
           elif [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
             os_version=$(sw_vers -productVersion | cut -d '.' -f 1)
-            echo "artifacts_name=llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
           elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' ]; then
             os_version=$(lsb_release -rs | cut -d '.' -f 1)
-            echo "artifacts_name=llvm-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+            echo "artifacts_name=llvm-13.x-${{ matrix.platform.os_type }}-$os_version-$host_architecture-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
           elif [ "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
             os_name="${{ matrix.platform.os_type }}"
             os_name_without_build_type="${os_name%%-*}"
-            echo "artifacts_name=llvm-${os_name_without_build_type}-${host_architecture}-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
+            echo "artifacts_name=llvm-13.x-${os_name_without_build_type}-${host_architecture}-${{ matrix.platform.build_type }}" >> "${GITHUB_ENV}"
           fi
           echo "artifacts_path=../install-llvm" >> "${GITHUB_ENV}"
 
