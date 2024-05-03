@@ -74,14 +74,15 @@ jobs:
       - name: get host architecture
         shell: bash
         run: |
-          artifacts_name=""
           host_architecture=$(uname -m)
           if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
             compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
             artifacts_name=llvm-${{ matrix.platform.name }}-mvsc-$compiler_version-$host_architecture"
+            echo "artifacts_name=$artifacts_name"
           else
             artifacts_name=llvm-${{ matrix.platform.name }}-$host_architecture"
-          echo "HOST_ARCHITECTURE=$host_architecture"
+            echo "artifacts_name=$artifacts_name"
+          
 
       - name: check host architecture
         shell: bash
