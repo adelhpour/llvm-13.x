@@ -102,7 +102,7 @@ jobs:
       - name: check OS version
         if: matrix.platform.os_type == 'macos'
         run: |
-          echo "OS version: ${CMAKE_OSX_ARCHITECTURES}"
+          echo "OS version: ${OSX_ARCHITECTURES}"
             
 
       - name: Setup Ninja
