@@ -74,8 +74,14 @@ jobs:
       - name: get host architecture
         shell: bash
         run: |
-          architecture=$(uname -m)
-          echo "HOST_ARCHITECTURE=$architecture" >> "${GITHUB_ENV}"
+          artifacts_name=""
+          host_architecture=$(uname -m)
+          if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
+            compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
+            artifacts_name=llvm-${{ matrix.platform.name }}-mvsc-$compiler_version-$host_architecture"
+          else
+            artifacts_name=llvm-${{ matrix.platform.name }}-$host_architecture"
+          echo "HOST_ARCHITECTURE=$host_architecture"
 
       - name: check host architecture
         shell: bash
@@ -234,23 +240,12 @@ jobs:
         shell: bash
         run: |
           cd ${RUNNER_WORKSPACE}
-          compiler_name=""
-            if [ "${{ matrix.platform.os_type }}" == 'macos' ]; then
-                compiler=$(cc -v 2>&1 | grep "Apple clang" && echo "clang" || echo "gcc")
-                if [ "$compiler" == "clang" ]; then
-                  compiler_version=$(cc --version | head -n 1 | awk '{print $4}')
-                else
-                  compiler_version=$(cc --version | head -n 1 | awk '{print $3}')
-                fi
-                compiler_name=${compiler}-${compiler_version}
-            elif [ "${{ matrix.platform.os_type }}" == 'ubuntu' || "${{ matrix.platform.os_type }}" == 'manylinux' ]; then
-                compiler_version=$(gcc --version | head -n 1 | awk '{print $3}')
-                compiler_name=gcc-${compiler_version}
-            elif [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
-                compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
-                compiler_name=msvc-${compiler_version}
-            fi
-          echo "artifacts_name=llvm-${{ matrix.platform.name }}" >> "${GITHUB_ENV}"
+          host_architecture=$(uname -m)
+          if [ "${{ matrix.platform.os_type }}" == 'windows' ]; then
+            compiler_version=$(ls "C:\Program Files\Microsoft Visual Studio")
+            echo "artifacts_name=llvm-${{ matrix.platform.name }}-mvsc-$compiler_version-$host_architecture" >> "${GITHUB_ENV}"
+          else
+            echo "artifacts_name=llvm-${{ matrix.platform.name }}-$host_architecture" >> "${GITHUB_ENV}"
           # we need to use relative path as actions/upload-artifact@v1 cannot find it on containerized runners
           echo "artifacts_path=../install-llvm" >> "${GITHUB_ENV}"
 
