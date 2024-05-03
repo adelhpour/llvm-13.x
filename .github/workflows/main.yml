@@ -93,6 +93,7 @@ jobs:
           fi
 
       - name: Get Host Architecture
+        shell: bash
         run: |
           architecture=$(uname -m)
           echo "host_architecture=$architecture" >> "${GITHUB_ENV}"
