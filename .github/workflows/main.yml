@@ -92,11 +92,11 @@ jobs:
             echo "/opt/rh/devtoolset-11/root/usr/bin" >> "${GITHUB_PATH}"
           fi
 
-        - name: Get Host Architecture
-          run: echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
+      - name: Get Host Architecture
+        run: echo "host_architecture=$(uname -m)" >> "${GITHUB_ENV}"
 
-        - name: check host architecture
-          run: echo ${host_architecture{
+      - name: check host architecture
+        run: echo ${host_architecture{
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
