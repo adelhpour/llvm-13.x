@@ -18,12 +18,18 @@ jobs:
           - name: macos-11-release
             os_type: macos
             os_name: macos-11
-            arch: x86_64
             build_type: Release
           - name: macos-11-debug
             os_type: macos
             os_name: macos-11
-            arch: x86_64
+            build_type: Debug
+          - name: macos-latest-release
+            os_type: macos
+            os_name: macos-latest
+            build_type: Release
+          - name: macos-latest-debug
+            os_type: macos
+            os_name: macos-latest
             build_type: Debug
           - name: ubuntu-latest-release
             os_type: ubuntu
@@ -37,10 +43,12 @@ jobs:
             os_type: windows
             os_name: windows-latest
             build_type: Release
+            vs_version: 2019
           - name: windows-latest-debug
             os_type: windows
             os_name: windows-latest
             build_type: Debug
+            vs_version: 2019
           - name: manylinux2014-release
             os_type: manylinux
             os_name: ubuntu-latest
@@ -63,9 +71,30 @@ jobs:
       - name: Checkout LLVM
         uses: actions/checkout@v3
 
+      - name: get host architecture
+        shell: bash
+        run: |
+          architecture=$(uname -m)
+          echo "HOST_ARCHITECTURE=$architecture" >> "${GITHUB_ENV}"
+
+      - name: check host architecture
+        shell: bash
+        run: |
+          echo "HOST_ARCHITECTURE is: $HOST_ARCHITECTURE"
+
       - name: Set MSVC as the default compiler on Windows
         if: matrix.platform.os_type == 'windows'
         uses: ilammy/msvc-dev-cmd@v1.6.0
+        with:
+          arch: ${HOST_ARCHITECTURE}
+          vsversion: ${{ matrix.platform.vs_version }}
+
+      - name: Get visual studio version
+        if : matrix.platform.os_type == 'windows'
+        shell: bash
+        run: |
+          $vsVersion = (Get-ChildItem "C:\Program Files (x86)\Microsoft Visual Studio\" -Directory | Where-Object { $_.Name -match "^\d{2}\.\d$" } | Select-Object -Last 1).Name
+          echo "visual studio version is $vsVersion"
 
       - name: Upgrade gcc on ManyLinux
         if: matrix.platform.os_type == 'manylinux'
@@ -141,7 +170,7 @@ jobs:
           cmake $GITHUB_WORKSPACE/llvm \
           -G "Ninja" \
           -DCMAKE_BUILD_TYPE=${{ matrix.platform.build_type }} \
-          -DCMAKE_OSX_ARCHITECTURES=${{ matrix.platform.arch }} \
+          -DCMAKE_OSX_ARCHITECTURES=${HOST_ARCHITECTURE} \
           -DCMAKE_C_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_CXX_COMPILER_LAUNCHER=${COMPILER_LAUNCHER} \
           -DCMAKE_INSTALL_PREFIX="${RUNNER_WORKSPACE}/install-llvm"
