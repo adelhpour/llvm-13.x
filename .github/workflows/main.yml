@@ -90,7 +90,7 @@ jobs:
         if : matrix.platform.os_type == 'windows'
         shell: bash
         run: |
-          ls "C:\Program Files (x86)\Microsoft Visual Studio"
+          ls -a "C:\Program Files (x86)\Microsoft Visual Studio"
 
       - name: Upgrade gcc on ManyLinux
         if: matrix.platform.os_type == 'manylinux'
